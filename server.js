@@ -101,25 +101,33 @@ app.post('/api/exercise/add', (req, res) => {
 //  {"description":"blah","duration":12,"date":"Sat Aug 11 2012"}]}
 
 app.get('/api/exercise/log', (req, res) => {
-  const { userId, limit } = req.query
+  const { userId, limit, from, to } = req.query
+  
+  if ( (from && isNaN(new Date(from))) || (to && isNaN(new Date(to))) ) {
+    return res.json({"error":"Invalid 'to' or 'from' date"})
+  }
+                                         }
   Person.findById(userId).exec((err, person) => {
     const { _id, username } = person
     if (err) return res.json({"error":"server error"})
     if (!person) return res.json({"error":"user not found"})
     
-    Exercise.find({userId: person._id}).limit(limit).exec((err, exercises) => {
-      if (err) {
-        return res.json({"error":"server error"})
-      const log = exercises.map(exercise => {
-        return {
-          description: exercise.description,
-          duration: exercise.duration,
-          date: formatDate(exercise.date)
-        }
+    Exercise
+      .find({userId: person._id})
+      .where('date').gt(from).lt(to)
+      .limit(Number(limit))
+      .exec((err, exercises) => {
+        if (err) return res.json({"error":err})
+        const log = exercises.map(exercise => {
+          return {
+            description: exercise.description,
+            duration: exercise.duration,
+            date: formatDate(exercise.date)
+          }
+        })
+        person.count = exercises.length
+        return res.json({_id, username, count: log.length, log})
       })
-      person.count = exercises.length
-      return res.json({_id, username, count: log.length, log})
-    })
   })
 })
 
