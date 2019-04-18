@@ -18,6 +18,31 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
+// CREATE USER ROUTE
+// username
+// {"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}
+app.post('/api/exercise/new-user', (req, res) => {
+})
+
+// RETRIEVE ALL USERS ROUTE
+// [{"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}, {"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}]
+app.get('api/exercise/users', (req, res) => {
+})
+
+// CREATE EXERCISE ROUTE
+// userId, description, duration, date || current date
+// {"username":"phpeter","description":"blah","duration":12,"_id":"H12FHSBFg","date":"Fri Aug 09 2019"}
+app.post('/api/exercise/add', (req, res) => {
+})
+
+// RETRIEVE USER EXERCISE LOG ROUTE
+// userId, from & too?, limit?
+// {"_id":"H12FHSBFg","username":"phpeter","count":2,
+//  "log":[{"description":"test thing","duration":23,"date":"Thu Feb 16 2017"},
+//  {"description":"blah","duration":12,"date":"Sat Aug 11 2012"}]}
+app.get('/api/exercise/log?userId=', (req, res) => {
+})
+
 
 // Not found middleware
 app.use((req, res, next) => {
