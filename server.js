@@ -73,7 +73,8 @@ app.get('/api/exercise/users', (req, res) => {
 // userId, description, duration, date || current date
 // {"username":"phpeter","description":"blah","duration":12,"_id":"H12FHSBFg","date":"Fri Aug 09 2019"}
 app.post('/api/exercise/add', (req, res) => {
-  const { userId, description, duration, date } = req.body
+  const { userId, description, duration } = req.body
+  const date = new Date(req.body.date)
   
   Person.findById(userId, (err, person) => {
     if (err) return res.json({"error":"server error"})
@@ -108,42 +109,25 @@ app.get('/api/exercise/log', (req, res) => {
     const { _id, username } = person
     if (err) return res.json({"error":"server error"})
     if (!person) return res.json({"error":"user not found"})
-    
-    const options = {}
-    
-    if (limit) {
-      options.limit = limit
-    }
-    
-    if (to && !isNaN(new Date(to))) {
-      options. = {$gt: new Date(to)}
-    }
-    
+  
     const query = {
       userId: person._id,
       date: {
-        $lg: isNaN(new Date(to)) ? Date.now
+        $lg: isNaN(new Date(to).getTime()) ? new Date() : new Date(to),
+        $lt: isNaN(new Date(from)) ? 0 : new Date(from)
       }
     }
     
-    if (to && !isNaN(new Date(to))) {
-      query.date = {$gt: new Date(to)}
-    }
-    
-//     if (from && !isNaN(new Date(from))) {
-//       query.date = {$gt: new Date(from)}
-//     }
-    
-    if (limit) {
-      query.limit = limit
-    }
-    
     console.log(query)
-    
+        
     Exercise
       .find(query)
+      .limit(parseInt(limit))
       .exec((err, exercises) => {
-        if (err) return res.json({"error":err})
+        if (err) {
+          console.log(err)
+          return res.json({"error":err})
+        }
         const log = exercises.map(exercise => {
           return {
             description: exercise.description,
