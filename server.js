@@ -79,13 +79,14 @@ app.get('/api/exercise/users', (req, res) => {
 app.post('/api/exercise/add', (req, res) => {
   const { userId, description, duration, date } = req.body
   const submittedDate = new Date(date)
-  const now = new Date().toUTCString().substring(0,17)
-  const exerciseDate = isNaN(submittedDate) ? now : submittedDate.toUTCString().substring(0,17)
+  const now = new Date().toUTCString().substring(0,16)
+  const exerciseDate = isNaN(submittedDate) ? now : submittedDate.toUTCString().substring(0,16)
+  console.log(now, exerciseDate)
   
   Person.findById(userId, (err, person) => {
     if (err) return res.json({"error":"server error"})
     if (!person) return res.json({"error":"user not found"})
-    
+    console.log('initial person', person)
     new Exercise ({
       username: person.username,
       description,
@@ -94,16 +95,14 @@ app.post('/api/exercise/add', (req, res) => {
     }).save((err, exercise) => {
       if (err) return res.json({"error":"server error"})
       const { username, description, duration, _id, date } = exercise
-      
-      Person.findByIdAndUpdate(use
-      
-      return res.json({ username, description, duration, _id, date })
+      console.log('exercise', exercise)
+      Person.findByIdAndUpdate(userId, {$push: {log: exercise}}, {new: true}, (err, updatedPerson) => {
+        if (err) return res.json({"error":"server error"})
+        console.log('updated person', updatedPerson)
+        return res.json({ username, description, duration, _id, date })
+      })
     })
   })
-  
-  
-  
-  
 })
 
 // RETRIEVE USER EXERCISE LOG ROUTE
