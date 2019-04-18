@@ -120,7 +120,10 @@ app.get('/api/exercise/log', (req, res) => {
     }
     
     const query = {
-      userId: person._id
+      userId: person._id,
+      date: {
+        $lg: isNaN(new Date(to)) ? Date.now
+      }
     }
     
     if (to && !isNaN(new Date(to))) {
