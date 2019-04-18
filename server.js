@@ -9,18 +9,21 @@ const cors = require('cors')
 // --------------------------------------------------------
 
 const mongoose = require('mongoose')
+const { Schema } = mongoose
+const { ObjectId } = Schema
+
 mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
 
-const personSchema = new mongoose.Schema({
+const personSchema = new Schema({
   username: String,
   log: {
     type: Array,
-    of: mongoose.ObjectId
+    of: ObjectId
   }
 })
 
-const exerciseSchema = new mongoose.Schema({
-  userId: mongoose.ObjectId,
+const exerciseSchema = new Schema({
+  userId: ObjectId,
   description: String,
   duration: Number,
   date: {
@@ -29,8 +32,8 @@ const exerciseSchema = new mongoose.Schema({
   }
 })
 
-const Person = mongoose.Model('Person', personSchema)
-const Exercise = mongoose.Model('Exercise', exerciseSchema)
+const Person = mongoose.model('Person', personSchema)
+const Exercise = mongoose.model('Exercise', exerciseSchema)
 
 // --------------------------------------------------------
 
@@ -64,9 +67,10 @@ app.post('/api/exercise/new-user', (req, res) => {
 // RETRIEVE ALL USERS ROUTE
 // [{"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}, {"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}]
 app.get('api/exercise/users', (req, res) => {
-  Person.find({}, (err, people) => {
-    if (err) return res.json({"error":"server error"})
-  })
+  // Person.find({}, (err, people) => {
+  //   if (err) return res.json({"error":"server error"})
+  //   return res.json(people)
+  // })
 })
 
 // CREATE EXERCISE ROUTE
