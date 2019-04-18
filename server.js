@@ -103,19 +103,30 @@ app.post('/api/exercise/add', (req, res) => {
 app.get('/api/exercise/log', (req, res) => {
   const { userId, limit, from, to } = req.query
   
-  if ( (from && isNaN(new Date(from))) || (to && isNaN(new Date(to))) ) {
-    return res.json({"error":"Invalid 'to' or 'from' date"})
-  }
-                                         }
+  
   Person.findById(userId).exec((err, person) => {
     const { _id, username } = person
     if (err) return res.json({"error":"server error"})
     if (!person) return res.json({"error":"user not found"})
     
+    const query = {
+      userId: person._id
+    }
+    
+    if (to && !isNaN(new Date(to))) {
+      query.where('date').lt(new Date(to))
+    }
+    
+    if (from && !isNaN(new Date(from))) {
+      query.where('date').gt(new Date(from))
+    }
+    
+    if (limit) {
+      query.limit = Number(limit)
+    }
+    
     Exercise
-      .find({userId: person._id})
-      .where('date').gt(from).lt(to)
-      .limit(Number(limit))
+      .find(query)
       .exec((err, exercises) => {
         if (err) return res.json({"error":err})
         const log = exercises.map(exercise => {
