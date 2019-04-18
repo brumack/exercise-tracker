@@ -16,10 +16,6 @@ mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
 
 const personSchema = new Schema({
   username: String,
-  log: {
-    type: Array,
-    of: ObjectId
-  }
 })
 
 const exerciseSchema = new Schema({
@@ -84,23 +80,19 @@ app.post('/api/exercise/add', (req, res) => {
     if (!person) return res.json({"error":"user not found"})
 
     new Exercise ({
-      username: person.username,
+      userId,
       description,
       duration,
       date: isNaN(new Date(date)) ? new Date() : new Date(date)
     }).save((err, exercise) => {
       if (err) return res.json({"error":"server error"})
       const { username, description, duration, _id, date } = exercise
-      
-      Person.findByIdAndUpdate(userId, {$push: {log: exercise}}, {new: true}, (err, updatedPerson) => {
-        if (err) return res.json({"error":"server error"})
-        return res.json({ username: updatedPerson.username, description, duration, _id, date: formatDate(date) })
-      })
+      return res.json({username: person.username, description, duration, _id, date: formatDate(date)})
     })
   })
 })
 
-// 5cb8b76631089507258ec366
+// 5cb8c17e0765b11b71bb366e
 
 // RETRIEVE USER EXERCISE LOG ROUTE
 // userId, from & too?, limit?
@@ -109,15 +101,16 @@ app.post('/api/exercise/add', (req, res) => {
 //  {"description":"blah","duration":12,"date":"Sat Aug 11 2012"}]}
 
 app.get('/api/exercise/log', (req, res) => {
-  Person.findById(req.query.userId).select('_id username log').exec((err, person) => {
+  Person.findById(req.query.userId).exec((err, person) => {
+    const { _id, username } = person
     if (err) return res.json({"error":"server error"})
     if (!person) return res.json({"error":"user not found"})
     Exercise.find({username: person.username}).select('description duration date').exec((err, exercises) => {
       if (err) return res.json({"error":"server error"})
-      console.log(exercises)
+      
       person.log = exercises
-      person.count = person.log.length
-      return res.json(person)
+      person.count = exercises.length
+      return res.json({_id, username, count: exercises.length, log: exercies})
     })
   })
 })
