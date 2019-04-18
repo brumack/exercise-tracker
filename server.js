@@ -78,28 +78,23 @@ app.get('/api/exercise/users', (req, res) => {
 // {"username":"phpeter","description":"blah","duration":12,"_id":"H12FHSBFg","date":"Fri Aug 09 2019"}
 app.post('/api/exercise/add', (req, res) => {
   const { userId, description, duration, date } = req.body
-  const submittedDate = new Date(date)
-  const now = new Date().toUTCString().substring(0,16)
-  const exerciseDate = isNaN(submittedDate) ? now : submittedDate.toUTCString().substring(0,16)
-  console.log(now, exerciseDate)
   
   Person.findById(userId, (err, person) => {
     if (err) return res.json({"error":"server error"})
     if (!person) return res.json({"error":"user not found"})
-    console.log('initial person', person)
+
     new Exercise ({
       username: person.username,
       description,
       duration,
-      date: exerciseDate
+      date: isNaN(new Date(date)) ? new Date() : new Date(date)
     }).save((err, exercise) => {
       if (err) return res.json({"error":"server error"})
       const { username, description, duration, _id, date } = exercise
-      console.log('exercise', exercise)
+      
       Person.findByIdAndUpdate(userId, {$push: {log: exercise}}, {new: true}, (err, updatedPerson) => {
         if (err) return res.json({"error":"server error"})
-        console.log('updated person', updatedPerson)
-        return res.json({ username, description, duration, _id, date })
+        return res.json({ username, description, duration, _id, date: formatDate(date) })
       })
     })
   })
@@ -141,3 +136,9 @@ app.use((err, req, res, next) => {
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
+
+
+function formatDate(date) {
+  const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'}
+  return date.toLocaleDateString('en-US', options)
+}
