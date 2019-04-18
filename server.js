@@ -66,17 +66,19 @@ app.post('/api/exercise/new-user', (req, res) => {
 
 // RETRIEVE ALL USERS ROUTE
 // [{"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}, {"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}]
-app.get('api/exercise/users', (req, res) => {
-  // Person.find({}, (err, people) => {
-  //   if (err) return res.json({"error":"server error"})
-  //   return res.json(people)
-  // })
+app.get('/api/exercise/users', (req, res) => {
+  Person.find({}).select('_id username').exec((err, people) => {
+    if (err) return res.json({"error":"server error"})
+    return res.json(people)
+  })
 })
 
 // CREATE EXERCISE ROUTE
 // userId, description, duration, date || current date
 // {"username":"phpeter","description":"blah","duration":12,"_id":"H12FHSBFg","date":"Fri Aug 09 2019"}
 app.post('/api/exercise/add', (req, res) => {
+  const { username, description, duration, _id: userId, date } = req.body
+  console.log(req.body)
 })
 
 // RETRIEVE USER EXERCISE LOG ROUTE
