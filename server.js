@@ -75,6 +75,7 @@ app.get('/api/exercise/users', (req, res) => {
 app.post('/api/exercise/add', (req, res) => {
   const { userId, description, duration } = req.body
   const date = new Date(req.body.date)
+  console.log(date)
   
   Person.findById(userId, (err, person) => {
     if (err) return res.json({"error":"server error"})
@@ -84,9 +85,12 @@ app.post('/api/exercise/add', (req, res) => {
       userId,
       description,
       duration,
-      date: isNaN(new Date(date)) ? new Date() : new Date(date)
+      date: date != 'Invalid Date' ? date.getTime() : new Date().getTime()
     }).save((err, exercise) => {
-      if (err) return res.json({"error":"server error"})
+      if (err) {
+        console.log(err)
+        return res.json({"error":"server error"})
+      }
       const { username, description, duration, _id, date } = exercise
       return res.json({username: person.username, description, duration, _id, date: formatDate(date)})
     })
@@ -102,7 +106,9 @@ app.post('/api/exercise/add', (req, res) => {
 //  {"description":"blah","duration":12,"date":"Sat Aug 11 2012"}]}
 
 app.get('/api/exercise/log', (req, res) => {
-  const { userId, limit, from, to } = req.query
+  const { userId, limit } = req.query
+  const to = new Date(req.query.to)
+  const from = new Date(req.query.from)
   
   
   Person.findById(userId).exec((err, person) => {
@@ -113,8 +119,8 @@ app.get('/api/exercise/log', (req, res) => {
     const query = {
       userId: person._id,
       date: {
-        $lg: isNaN(new Date(to).getTime()) ? new Date() : new Date(to),
-        $lt: isNaN(new Date(from)) ? 0 : new Date(from)
+        $lg: from != 'Invalid Date' ? from.getTime() : 0,
+        $lt: to != 'Invalid Date' ? to.getTime() : new Date().getTime()
       }
     }
     
