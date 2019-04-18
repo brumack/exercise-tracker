@@ -109,6 +109,16 @@ app.get('/api/exercise/log', (req, res) => {
     if (err) return res.json({"error":"server error"})
     if (!person) return res.json({"error":"user not found"})
     
+    const options = {}
+    
+    if (limit) {
+      options.limit = limit
+    }
+    
+    if (to && !isNaN(new Date(to))) {
+      options. = {$gt: new Date(to)}
+    }
+    
     const query = {
       userId: person._id
     }
@@ -117,12 +127,12 @@ app.get('/api/exercise/log', (req, res) => {
       query.date = {$gt: new Date(to)}
     }
     
-    if (from && !isNaN(new Date(from))) {
-      query.date = {$gt: new Date(from)}
-    }
+//     if (from && !isNaN(new Date(from))) {
+//       query.date = {$gt: new Date(from)}
+//     }
     
     if (limit) {
-      query.limit = {$limit: limit}
+      query.limit = limit
     }
     
     console.log(query)
