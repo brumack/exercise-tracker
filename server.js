@@ -77,17 +77,33 @@ app.get('/api/exercise/users', (req, res) => {
 // userId, description, duration, date || current date
 // {"username":"phpeter","description":"blah","duration":12,"_id":"H12FHSBFg","date":"Fri Aug 09 2019"}
 app.post('/api/exercise/add', (req, res) => {
-  const { username, description, duration, date } = req.body
+  const { userId, description, duration, date } = req.body
   const submittedDate = new Date(date)
   const now = new Date().toUTCString().substring(0,17)
   const exerciseDate = isNaN(submittedDate) ? now : submittedDate.toUTCString().substring(0,17)
   
-  new Exercise ({
-    username,
-    description,
-    duration,
-    date: exerciseDate
-  }).save((err, exercise))
+  Person.findById(userId, (err, person) => {
+    if (err) return res.json({"error":"server error"})
+    if (!person) return res.json({"error":"user not found"})
+    
+    new Exercise ({
+      username: person.username,
+      description,
+      duration,
+      date: exerciseDate
+    }).save((err, exercise) => {
+      if (err) return res.json({"error":"server error"})
+      const { username, description, duration, _id, date } = exercise
+      
+      Person.findByIdAndUpdate(use
+      
+      return res.json({ username, description, duration, _id, date })
+    })
+  })
+  
+  
+  
+  
 })
 
 // RETRIEVE USER EXERCISE LOG ROUTE
