@@ -77,8 +77,17 @@ app.get('/api/exercise/users', (req, res) => {
 // userId, description, duration, date || current date
 // {"username":"phpeter","description":"blah","duration":12,"_id":"H12FHSBFg","date":"Fri Aug 09 2019"}
 app.post('/api/exercise/add', (req, res) => {
-  const { username, description, duration, _id: userId, date } = req.body
-  console.log(req.body)
+  const { username, description, duration, date } = req.body
+  const submittedDate = new Date(date)
+  const now = new Date().toUTCString().substring(0,17)
+  const exerciseDate = isNaN(submittedDate) ? now : submittedDate.toUTCString().substring(0,17)
+  
+  new Exercise ({
+    username,
+    description,
+    duration,
+    date: exerciseDate
+  }).save((err, exercise))
 })
 
 // RETRIEVE USER EXERCISE LOG ROUTE
