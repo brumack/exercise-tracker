@@ -94,11 +94,13 @@ app.post('/api/exercise/add', (req, res) => {
       
       Person.findByIdAndUpdate(userId, {$push: {log: exercise}}, {new: true}, (err, updatedPerson) => {
         if (err) return res.json({"error":"server error"})
-        return res.json({ username, description, duration, _id, date: formatDate(date) })
+        return res.json({ username: updatedPerson.username, description, duration, _id, date: formatDate(date) })
       })
     })
   })
 })
+
+// 5cb8b76631089507258ec366
 
 // RETRIEVE USER EXERCISE LOG ROUTE
 // userId, from & too?, limit?
@@ -106,6 +108,14 @@ app.post('/api/exercise/add', (req, res) => {
 //  "log":[{"description":"test thing","duration":23,"date":"Thu Feb 16 2017"},
 //  {"description":"blah","duration":12,"date":"Sat Aug 11 2012"}]}
 app.get('/api/exercise/log?userId=', (req, res) => {
+  console.log(req.query.userId)
+  Person.findById(req.query.userId).select('_id, username, log').exec((err, person) => {
+    if (err) return res.json({"error":"server error"})
+    if (!person) return res.json({"error":"user not found"})
+    
+    person.count = person.log.length
+    return res.json(person)
+  })
 })
 
 
