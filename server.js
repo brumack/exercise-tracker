@@ -110,22 +110,21 @@ app.get('/api/exercise/log', (req, res) => {
     if (!person) return res.json({"error":"user not found"})
     
     const query = {
-      userId: person._id,
+      userId: person._id
     }
     
-//     if (to && !isNaN(new Date(to))) {
-//       query.where('date').lt(new Date(to))
-//     }
+    if (to && !isNaN(new Date(to))) {
+      query.date = {$gt: new Date(to)}
+    }
     
-//     if (from && !isNaN(new Date(from))) {
-//       query.where('date').gt(new Date(from))
-//     }
+    if (from && !isNaN(new Date(from))) {
+      query.date = {$gt: new Date(from)}
+    }
     
-    // if (limit) {
-    //   query.limit = 2
-    // }
+    if (limit) {
+      query.limit = {$limit: limit}
+    }
     
-    console.log('limit', limit)
     console.log(query)
     
     Exercise
