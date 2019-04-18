@@ -101,16 +101,24 @@ app.post('/api/exercise/add', (req, res) => {
 //  {"description":"blah","duration":12,"date":"Sat Aug 11 2012"}]}
 
 app.get('/api/exercise/log', (req, res) => {
-  Person.findById(req.query.userId).exec((err, person) => {
+  const { userId, limit } = req.query
+  Person.findById(userId).exec((err, person) => {
     const { _id, username } = person
     if (err) return res.json({"error":"server error"})
     if (!person) return res.json({"error":"user not found"})
-    Exercise.find({username: person.username}).select('description duration date').exec((err, exercises) => {
-      if (err) return res.json({"error":"server error"})
-      
-      person.log = exercises
+    
+    Exercise.find({userId: person._id}).limit(limit).exec((err, exercises) => {
+      if (err) {
+        return res.json({"error":"server error"})
+      const log = exercises.map(exercise => {
+        return {
+          description: exercise.description,
+          duration: exercise.duration,
+          date: formatDate(exercise.date)
+        }
+      })
       person.count = exercises.length
-      return res.json({_id, username, count: exercises.length, log: exercies})
+      return res.json({_id, username, count: log.length, log})
     })
   })
 })
