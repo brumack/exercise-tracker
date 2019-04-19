@@ -34,8 +34,6 @@ const Exercise = mongoose.model('Exercise', exerciseSchema)
 // --------------------------------------------------------
 
 
-
-
 app.use(cors())
 
 app.use(bodyParser.urlencoded({extended: false}))
@@ -118,16 +116,15 @@ app.get('/api/exercise/log', (req, res) => {
     const query = {
       userId: person._id,
       date: {
-        $lg: from != 'Invalid Date' ? from.getTime() : 0,
-        $lt: to != 'Invalid Date' ? to : new Date()
+        $gte: from != 'Invalid Date' ? new Date(from) : 0,
+        $lte: to != 'Invalid Date' ? to : new Date()
       }
     }
-    
-    console.log(query)
-        
+            
     Exercise
       .find(query)
-      .limit(parseInt(limit))
+      .limit(Infinity)
+      .sort('-date')
       .exec((err, exercises) => {
         if (err) {
           console.log(err)
