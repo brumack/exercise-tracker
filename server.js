@@ -50,9 +50,10 @@ app.get('/', (req, res) => {
 // {"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}
 app.post('/api/exercise/new-user', (req, res) => {
   const { username } = req.body
+  const usernameTest = RegExp('^[a-z0-9]{5,}$','i')
   
-  if (username.length < 5 )
-    return res.json({"error":"username must be 5 characters or longer and not contain any special symbols"})
+  if (!usernameTest.test(username))
+    return res.json({"error":"username must be 5 characters or longer and not contain any special characters"})
   new Person({
     username
   }).save((err, person) => {
@@ -76,6 +77,9 @@ app.get('/api/exercise/users', (req, res) => {
 app.post('/api/exercise/add', (req, res) => {
   const { userId, description, duration } = req.body
   const date = new Date(req.body.date)
+  
+  if (userId === '' || description === '' || duration === '')
+    return res.json({"error":"please complete all required fields"})
   
   Person.findById(userId, (err, person) => {
     if (err) return res.json({"error":"server error"})
