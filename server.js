@@ -78,11 +78,19 @@ app.post('/api/exercise/add', (req, res) => {
   const { userId, description, duration } = req.body
   const date = new Date(req.body.date)
   
-  if (userId === '' || description === '' || duration === '')
+  if (userId.length != 24)
+    return res.json({"error":"invalid userId"})
+  
+  if (description === '' || duration === '')
     return res.json({"error":"please complete all required fields"})
   
   Person.findById(userId, (err, person) => {
-    if (err) return res.json({"error":"server error"})
+    
+    if (err) {
+      console.log(err)
+      return res.json({"error":"server error"})
+    }
+    
     if (!person) return res.json({"error":"user not found"})
 
     new Exercise ({
@@ -96,12 +104,16 @@ app.post('/api/exercise/add', (req, res) => {
         return res.json({"error":"server error"})
       }
       const { username, description, duration, _id, date } = exercise
-      return res.json({username: person.username, description, duration, _id, date: formatDate(date)})
+      return res.json({
+        username: person.username, 
+        description, 
+        duration, 
+        _id, 
+        date: formatDate(date)
+      })
     })
   })
 })
-
-// 5cb8c17e0765b11b71bb366e
 
 // RETRIEVE USER EXERCISE LOG ROUTE
 // userId, from & too?, limit?
