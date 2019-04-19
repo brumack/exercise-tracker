@@ -81,8 +81,11 @@ app.post('/api/exercise/add', (req, res) => {
   if (userId.length != 24)
     return res.json({"error":"invalid userId"})
   
-  if (description === '' || duration === '')
-    return res.json({"error":"please complete all required fields"})
+  if (!RegExp('^[a-z0-9]{1,}$', 'i').test(description))
+    return res.json({"error":"invalid description"})
+    
+  if (!RegExp('^[0-9]{1,}').test(duration))
+    return res.json({"error":"invalid duration"})
   
   Person.findById(userId, (err, person) => {
     
