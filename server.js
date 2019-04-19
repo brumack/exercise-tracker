@@ -1,10 +1,7 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
-
 const cors = require('cors')
-
-
 
 // --------------------------------------------------------
 
@@ -35,10 +32,8 @@ const Exercise = mongoose.model('Exercise', exerciseSchema)
 
 
 app.use(cors())
-
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
-
 
 app.use(express.static('public'))
 app.get('/', (req, res) => {
@@ -46,8 +41,6 @@ app.get('/', (req, res) => {
 });
 
 // CREATE USER ROUTE
-// username
-// {"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}
 app.post('/api/exercise/new-user', (req, res) => {
   const { username } = req.body
   const usernameTest = RegExp('^[a-z0-9]{5,}$','i')
@@ -63,7 +56,6 @@ app.post('/api/exercise/new-user', (req, res) => {
 })
 
 // RETRIEVE ALL USERS ROUTE
-// [{"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}, {"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}]
 app.get('/api/exercise/users', (req, res) => {
   Person.find({}).select('_id username').exec((err, people) => {
     if (err) return res.json({"error":"server error"})
@@ -72,8 +64,6 @@ app.get('/api/exercise/users', (req, res) => {
 })
 
 // CREATE EXERCISE ROUTE
-// userId, description, duration, date || current date
-// {"username":"phpeter","description":"blah","duration":12,"_id":"H12FHSBFg","date":"Fri Aug 09 2019"}
 app.post('/api/exercise/add', (req, res) => {
   const { userId, description, duration } = req.body
   const date = new Date(req.body.date)
@@ -89,10 +79,7 @@ app.post('/api/exercise/add', (req, res) => {
   
   Person.findById(userId, (err, person) => {
     
-    if (err) {
-      console.log(err)
-      return res.json({"error":"server error"})
-    }
+    if (err) return res.json({"error":"user not found"})
     
     if (!person) return res.json({"error":"user not found"})
 
@@ -102,10 +89,8 @@ app.post('/api/exercise/add', (req, res) => {
       duration,
       date: date != 'Invalid Date' ? new Date(date) : new Date()
     }).save((err, exercise) => {
-      if (err) {
-        console.log(err)
-        return res.json({"error":"server error"})
-      }
+      if (err) return res.json({"error":"server error"})
+      
       const { username, description, duration, _id, date } = exercise
       return res.json({
         username: person.username, 
@@ -119,20 +104,18 @@ app.post('/api/exercise/add', (req, res) => {
 })
 
 // RETRIEVE USER EXERCISE LOG ROUTE
-// userId, from & too?, limit?
-// {"_id":"H12FHSBFg","username":"phpeter","count":2,
-//  "log":[{"description":"test thing","duration":23,"date":"Thu Feb 16 2017"},
-//  {"description":"blah","duration":12,"date":"Sat Aug 11 2012"}]}
-
 app.get('/api/exercise/log', (req, res) => {
   const { userId, limit } = req.query
   const to = new Date(req.query.to)
   const from = new Date(req.query.from)
   
+  if (userId.length != 24)
+    return res.json({"error":"invalid userId"})
+  
   
   Person.findById(userId).exec((err, person) => {
     const { _id, username } = person
-    if (err) return res.json({"error":"server error"})
+    if (err) return res.json({"error":"user not found"})
     if (!person) return res.json({"error":"user not found"})
   
     const query = {
@@ -148,10 +131,8 @@ app.get('/api/exercise/log', (req, res) => {
       .limit(parseInt(limit))
       .sort('-date')
       .exec((err, exercises) => {
-        if (err) {
-          console.log(err)
-          return res.json({"error":err})
-        }
+        if (err) return res.json({"error":err})
+      
         const log = exercises.map(exercise => {
           return {
             description: exercise.description,
