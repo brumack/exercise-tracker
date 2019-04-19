@@ -50,6 +50,9 @@ app.get('/', (req, res) => {
 // {"username":"asdfasfdasdf","_id":"Hk3sD7UqE"}
 app.post('/api/exercise/new-user', (req, res) => {
   const { username } = req.body
+  
+  if (username.length < 5 )
+    return res.json({"error":"username must be 5 characters or longer and not contain any special symbols"})
   new Person({
     username
   }).save((err, person) => {
@@ -123,7 +126,7 @@ app.get('/api/exercise/log', (req, res) => {
             
     Exercise
       .find(query)
-      .limit(Infinity)
+      .limit(parseInt(limit))
       .sort('-date')
       .exec((err, exercises) => {
         if (err) {
