@@ -75,7 +75,6 @@ app.get('/api/exercise/users', (req, res) => {
 app.post('/api/exercise/add', (req, res) => {
   const { userId, description, duration } = req.body
   const date = new Date(req.body.date)
-  console.log(date)
   
   Person.findById(userId, (err, person) => {
     if (err) return res.json({"error":"server error"})
@@ -85,7 +84,7 @@ app.post('/api/exercise/add', (req, res) => {
       userId,
       description,
       duration,
-      date: date != 'Invalid Date' ? date.getTime() : new Date().getTime()
+      date: date != 'Invalid Date' ? new Date(date) : new Date()
     }).save((err, exercise) => {
       if (err) {
         console.log(err)
@@ -120,7 +119,7 @@ app.get('/api/exercise/log', (req, res) => {
       userId: person._id,
       date: {
         $lg: from != 'Invalid Date' ? from.getTime() : 0,
-        $lt: to != 'Invalid Date' ? to.getTime() : new Date().getTime()
+        $lt: to != 'Invalid Date' ? to : new Date()
       }
     }
     
